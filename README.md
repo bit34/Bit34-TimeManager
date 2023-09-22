@@ -1,10 +1,10 @@
-# Update Manager Library for Unity
+# Bit34 - Schedule Manager Library
 
-This is a minimal delayed call library for Unity.
+This is a minimal library for scheduled callbacks.
 
 ## Features
 
-- Call once on next frame
-- Call on every frame
-- Call with delay
-- Call once with delay
+- Add callbacks to be called every application tick
+- Add callbacks to be called after given interval
+- Auto remove callbacks after given call count
+- Pause, resume and remove callback individualy or by their owner key
