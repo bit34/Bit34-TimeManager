@@ -3,11 +3,11 @@ using Com.Bit34Games.Time.Constants;
 
 namespace Com.Bit34Games.Time.Utilities
 {
-    public interface IScheduleController
+    public interface ITimeManager
     {
         //  METHODS
-        void SetUpdate(Action updateMethod);
         DateTime GetNow(TimeTypes timeType);
         TimeSpan GetDelta(TimeTypes timeType);
+        void SetScale(float timeScale);
     }
 }

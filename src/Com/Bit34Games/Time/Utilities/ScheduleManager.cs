@@ -5,31 +5,28 @@ using Com.Bit34Games.Time.VOs;
 
 namespace Com.Bit34Games.Time.Utilities
 {
-    public class ScheduledManager
+    public class ScheduleManager : IScheduleManager
     {
         //  MEMBERS
         //      Private
-        private IScheduleController                 _controller;
+        private ITimeManager                        _timeManager;
         private Dictionary<object, ScheduleOwnerVO> _owners;
         private static bool                         _isUpdating;
         private LinkedList<Action>                  _postUpdateMethods;
 
         //  CONSTRUCTORS
-        public ScheduledManager(IScheduleController controller)
+        public ScheduleManager(ITimeManager timeManager)
         {
-            _controller        = controller;
+            _timeManager       = timeManager;
             _owners            = new Dictionary<object, ScheduleOwnerVO>();
             _postUpdateMethods = new LinkedList<Action>();
-
-            _controller.SetUpdate(Update);
         }
 
         //  METHODS
-        //  Call every tick until removed
         public void AddTick(object owner, TimeTypes timeType, Action<float> callback)
         {
             ScheduleOwnerVO     scheduleOwner     = GetOrCreateOwner(owner);
-            ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, TimeSpan.FromSeconds(0), -1, _controller.GetNow(timeType));
+            ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, TimeSpan.FromSeconds(0), -1, _timeManager.GetNow(timeType));
 
             if (_isUpdating)
             {
@@ -40,11 +37,10 @@ namespace Com.Bit34Games.Time.Utilities
             scheduleOwner.tickCallbacks.AddLast(scheduledCallback);
         }
 
-        //  Call every tick until removed or call count completed
         public void AddTick(object owner, TimeTypes timeType, Action<float> callback, int callCount)
         {
             ScheduleOwnerVO     scheduleOwner     = GetOrCreateOwner(owner);
-            ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, TimeSpan.FromSeconds(0), callCount, _controller.GetNow(timeType));
+            ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, TimeSpan.FromSeconds(0), callCount, _timeManager.GetNow(timeType));
             
             if (_isUpdating)
             {
@@ -55,11 +51,10 @@ namespace Com.Bit34Games.Time.Utilities
             scheduleOwner.tickCallbacks.AddLast(scheduledCallback);
         }
 
-        //  Call every interval until removed
         public void AddInterval(object owner, TimeTypes timeType, Action<float> callback, TimeSpan interval)
         {
             ScheduleOwnerVO     scheduleOwner     = GetOrCreateOwner(owner);
-            ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, interval, -1, _controller.GetNow(timeType));
+            ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, interval, -1, _timeManager.GetNow(timeType));
 
             if (_isUpdating)
             {
@@ -69,11 +64,10 @@ namespace Com.Bit34Games.Time.Utilities
             scheduleOwner.intervalCallbacks.AddLast(scheduledCallback);
         }
 
-        //  Call every interval until removed or call count completed
         public void AddInterval(object owner, TimeTypes timeType, Action<float> callback, TimeSpan interval, int callCount)
         {
             ScheduleOwnerVO     scheduleOwner     = GetOrCreateOwner(owner);
-            ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, interval, callCount, _controller.GetNow(timeType));
+            ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, interval, callCount, _timeManager.GetNow(timeType));
             
             if (_isUpdating)
             {
@@ -94,7 +88,7 @@ namespace Com.Bit34Games.Time.Utilities
             ScheduledCallbackVO scheduledCallback = FindCallback(owner, callback);
             if (scheduledCallback != null)
             {
-                scheduledCallback.Pause(_controller.GetNow(scheduledCallback.timeType));
+                scheduledCallback.Pause(_timeManager.GetNow(scheduledCallback.timeType));
             }
         }
 
@@ -114,14 +108,14 @@ namespace Com.Bit34Games.Time.Utilities
                 scheduledCallbackNode = scheduleOwner.tickCallbacks.First;
                 while(scheduledCallbackNode != null)
                 {
-                    scheduledCallbackNode.Value.Pause(_controller.GetNow(scheduledCallbackNode.Value.timeType));
+                    scheduledCallbackNode.Value.Pause(_timeManager.GetNow(scheduledCallbackNode.Value.timeType));
                     scheduledCallbackNode = scheduledCallbackNode.Next;
                 }
                 
                 scheduledCallbackNode = scheduleOwner.intervalCallbacks.First;
                 while(scheduledCallbackNode != null)
                 {
-                    scheduledCallbackNode.Value.Pause(_controller.GetNow(scheduledCallbackNode.Value.timeType));
+                    scheduledCallbackNode.Value.Pause(_timeManager.GetNow(scheduledCallbackNode.Value.timeType));
                     scheduledCallbackNode = scheduledCallbackNode.Next;
                 }
             }
@@ -138,7 +132,7 @@ namespace Com.Bit34Games.Time.Utilities
             ScheduledCallbackVO scheduledCallback = FindCallback(owner, callback);
             if (scheduledCallback != null)
             {
-                scheduledCallback.Resume(_controller.GetNow(scheduledCallback.timeType));
+                scheduledCallback.Resume(_timeManager.GetNow(scheduledCallback.timeType));
             }
         }
 
@@ -158,19 +152,18 @@ namespace Com.Bit34Games.Time.Utilities
                 scheduledCallbackNode = scheduleOwner.tickCallbacks.First;
                 while(scheduledCallbackNode != null)
                 {
-                    scheduledCallbackNode.Value.Resume(_controller.GetNow(scheduledCallbackNode.Value.timeType));
+                    scheduledCallbackNode.Value.Resume(_timeManager.GetNow(scheduledCallbackNode.Value.timeType));
                     scheduledCallbackNode = scheduledCallbackNode.Next;
                 }
                 
                 scheduledCallbackNode = scheduleOwner.intervalCallbacks.First;
                 while(scheduledCallbackNode != null)
                 {
-                    scheduledCallbackNode.Value.Resume(_controller.GetNow(scheduledCallbackNode.Value.timeType));
+                    scheduledCallbackNode.Value.Resume(_timeManager.GetNow(scheduledCallbackNode.Value.timeType));
                     scheduledCallbackNode = scheduledCallbackNode.Next;
                 }
             }
         }
-
 
         public void Remove(object owner, Action<float> callback)
         {
@@ -225,6 +218,53 @@ namespace Com.Bit34Games.Time.Utilities
             }
         }
 
+        public void Update()
+        {
+            _isUpdating = true;
+
+            foreach (ScheduleOwnerVO scheduleOwner in _owners.Values)
+            {
+                foreach (ScheduledCallbackVO scheduledCallback in scheduleOwner.tickCallbacks)
+                {
+                    if (!scheduledCallback.IsPaused)
+                    {
+                        TimeSpan elapsed = _timeManager.GetDelta(scheduledCallback.timeType);
+                        scheduledCallback.Call(elapsed);
+                        if (scheduledCallback.RemainingCallCount==0)
+                        {
+                            Remove(scheduleOwner.owner, scheduledCallback.callback);
+                        }
+                    }
+                }
+
+                foreach (ScheduledCallbackVO scheduledCallback in scheduleOwner.intervalCallbacks)
+                {
+                    if (!scheduledCallback.IsPaused)
+                    {
+                        DateTime now     = _timeManager.GetNow(scheduledCallback.timeType);
+                        TimeSpan elapsed = now - scheduledCallback.LastCall;
+                        if (elapsed >= scheduledCallback.interval)
+                        {
+                            scheduledCallback.Call(elapsed);
+                            if (scheduledCallback.RemainingCallCount==0)
+                            {
+                                Remove(scheduleOwner.owner, scheduledCallback.callback);
+                            }
+                        }
+                    }
+                }
+            }
+            _isUpdating = false;
+                
+            LinkedListNode<Action> node = _postUpdateMethods.First;
+            while(node!=null)
+            {
+                node.Value();
+                node = node.Next;
+            }
+            _postUpdateMethods.Clear();
+        }
+
         private ScheduleOwnerVO GetOrCreateOwner(object owner)
         {
             ScheduleOwnerVO scheduleOwner;
@@ -269,45 +309,5 @@ namespace Com.Bit34Games.Time.Utilities
             return null;
         }
 
-        private void Update()
-        {
-            _isUpdating = true;
-
-            foreach (ScheduleOwnerVO scheduleOwner in _owners.Values)
-            {
-                foreach (ScheduledCallbackVO scheduledCallback in scheduleOwner.tickCallbacks)
-                {
-                    TimeSpan elapsed = _controller.GetDelta(scheduledCallback.timeType);
-                    scheduledCallback.Call(elapsed);
-                    if (scheduledCallback.RemainingCallCount==0)
-                    {
-                        Remove(scheduleOwner.owner, scheduledCallback.callback);
-                    }
-                }
-
-                foreach (ScheduledCallbackVO scheduledCallback in scheduleOwner.intervalCallbacks)
-                {
-                    DateTime now     = _controller.GetNow(scheduledCallback.timeType);
-                    TimeSpan elapsed = now - scheduledCallback.LastCall;
-                    if (elapsed >= scheduledCallback.interval)
-                    {
-                        scheduledCallback.Call(elapsed);
-                        if (scheduledCallback.RemainingCallCount==0)
-                        {
-                            Remove(scheduleOwner.owner, scheduledCallback.callback);
-                        }
-                    }
-                }
-            }
-            _isUpdating = false;
-                
-            LinkedListNode<Action> node = _postUpdateMethods.First;
-            while(node!=null)
-            {
-                node.Value();
-                node = node.Next;
-            }
-            _postUpdateMethods.Clear();
-        }
     }
 }
