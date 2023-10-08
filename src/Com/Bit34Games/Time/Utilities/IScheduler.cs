@@ -3,7 +3,7 @@ using Com.Bit34Games.Time.Constants;
 
 namespace Com.Bit34Games.Time.Utilities
 {
-    public interface IScheduleManager
+    public interface IScheduler
     {
         //  METHODS
         //  Call every tick until removed
