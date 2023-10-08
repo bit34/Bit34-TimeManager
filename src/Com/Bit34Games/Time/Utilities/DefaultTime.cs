@@ -10,7 +10,6 @@ namespace Com.Bit34Games.Time.Utilities
         public float TickInterval { get; private set; }
         public float TimeScale { get; private set; }
         //      Private
-        private Action     _tickMethod;
         private DateTime   _applicationStartTime;
         private DateTime[] _nows;
         private TimeSpan[] _deltas;
