@@ -33,10 +33,11 @@ namespace Com.Bit34Games.Time.Utilities
             if (_isUpdating)
             {
                 _postUpdateMethods.AddLast(()=>{ scheduleOwner.tickCallbacks.AddLast(scheduledCallback); });
-                return;
             }
-
-            scheduleOwner.tickCallbacks.AddLast(scheduledCallback);
+            else
+            {
+                scheduleOwner.tickCallbacks.AddLast(scheduledCallback);
+            }
         }
 
         public void AddTick(object owner, TimeTypes timeType, Action<float> callback, int callCount)
@@ -47,10 +48,11 @@ namespace Com.Bit34Games.Time.Utilities
             if (_isUpdating)
             {
                 _postUpdateMethods.AddLast(()=>{ scheduleOwner.tickCallbacks.AddLast(scheduledCallback); });
-                return;
             }
-
-            scheduleOwner.tickCallbacks.AddLast(scheduledCallback);
+            else
+            {
+                scheduleOwner.tickCallbacks.AddLast(scheduledCallback);
+            }
         }
 
         public void AddInterval(object owner, TimeTypes timeType, Action<float> callback, TimeSpan interval)
@@ -62,8 +64,10 @@ namespace Com.Bit34Games.Time.Utilities
             {
                 _postUpdateMethods.AddLast(()=>{ scheduleOwner.intervalCallbacks.AddLast(scheduledCallback); });
             }
-
-            scheduleOwner.intervalCallbacks.AddLast(scheduledCallback);
+            else
+            {
+                scheduleOwner.intervalCallbacks.AddLast(scheduledCallback);
+            }
         }
 
         public void AddInterval(object owner, TimeTypes timeType, Action<float> callback, TimeSpan interval, int callCount)
@@ -75,8 +79,10 @@ namespace Com.Bit34Games.Time.Utilities
             {
                 _postUpdateMethods.AddLast(()=>{ scheduleOwner.intervalCallbacks.AddLast(scheduledCallback); });
             }
-
-            scheduleOwner.intervalCallbacks.AddLast(scheduledCallback);
+            else
+            {
+                scheduleOwner.intervalCallbacks.AddLast(scheduledCallback);
+            }
         }
 
         public void Pause(object owner, Action<float> callback)
