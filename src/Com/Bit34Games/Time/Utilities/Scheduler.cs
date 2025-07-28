@@ -27,60 +27,56 @@ namespace Com.Bit34Games.Time.Utilities
         //  METHODS
         public void AddTick(object owner, TimeTypes timeType, Action<float> callback)
         {
-            ScheduleOwnerVO     scheduleOwner     = GetOrCreateOwner(owner);
-            ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, TimeSpan.FromSeconds(0), -1, _time.GetNow(timeType));
-
             if (_isUpdating)
             {
-                _postUpdateMethods.AddLast(()=>{ scheduleOwner.tickCallbacks.AddLast(scheduledCallback); });
+                _postUpdateMethods.AddLast(()=>{ AddTick(owner, timeType, callback); });
             }
             else
             {
+                ScheduleOwnerVO     scheduleOwner     = GetOrCreateOwner(owner);
+                ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, TimeSpan.FromSeconds(0), -1, _time.GetNow(timeType));
                 scheduleOwner.tickCallbacks.AddLast(scheduledCallback);
             }
         }
 
         public void AddTick(object owner, TimeTypes timeType, Action<float> callback, int callCount)
         {
-            ScheduleOwnerVO     scheduleOwner     = GetOrCreateOwner(owner);
-            ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, TimeSpan.FromSeconds(0), callCount, _time.GetNow(timeType));
-            
             if (_isUpdating)
             {
-                _postUpdateMethods.AddLast(()=>{ scheduleOwner.tickCallbacks.AddLast(scheduledCallback); });
+                _postUpdateMethods.AddLast(()=>{ AddTick(owner, timeType, callback, callCount); });
             }
             else
             {
+                ScheduleOwnerVO     scheduleOwner     = GetOrCreateOwner(owner);
+                ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, TimeSpan.FromSeconds(0), callCount, _time.GetNow(timeType));
                 scheduleOwner.tickCallbacks.AddLast(scheduledCallback);
             }
         }
 
         public void AddInterval(object owner, TimeTypes timeType, Action<float> callback, TimeSpan interval)
         {
-            ScheduleOwnerVO     scheduleOwner     = GetOrCreateOwner(owner);
-            ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, interval, -1, _time.GetNow(timeType));
-
             if (_isUpdating)
             {
-                _postUpdateMethods.AddLast(()=>{ scheduleOwner.intervalCallbacks.AddLast(scheduledCallback); });
+                _postUpdateMethods.AddLast(()=>{ AddInterval(owner, timeType, callback, interval); });
             }
             else
             {
+                ScheduleOwnerVO     scheduleOwner     = GetOrCreateOwner(owner);
+                ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, interval, -1, _time.GetNow(timeType));
                 scheduleOwner.intervalCallbacks.AddLast(scheduledCallback);
             }
         }
 
         public void AddInterval(object owner, TimeTypes timeType, Action<float> callback, TimeSpan interval, int callCount)
         {
-            ScheduleOwnerVO     scheduleOwner     = GetOrCreateOwner(owner);
-            ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, interval, callCount, _time.GetNow(timeType));
-            
             if (_isUpdating)
             {
-                _postUpdateMethods.AddLast(()=>{ scheduleOwner.intervalCallbacks.AddLast(scheduledCallback); });
+                _postUpdateMethods.AddLast(()=>{ AddInterval(owner, timeType, callback, interval, callCount); });
             }
             else
             {
+                ScheduleOwnerVO     scheduleOwner     = GetOrCreateOwner(owner);
+                ScheduledCallbackVO scheduledCallback = new ScheduledCallbackVO(timeType, callback, interval, callCount, _time.GetNow(timeType));
                 scheduleOwner.intervalCallbacks.AddLast(scheduledCallback);
             }
         }
