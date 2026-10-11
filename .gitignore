@@ -33,4 +33,8 @@ msbuild.wrn
 .vs/
 
 # Unity3d
+#   .meta files are noise in a source tree, except under unity/ — those are
+#   part of what the package publishes, and Unity identifies an asset by the
+#   GUID in its .meta, so they have to travel with the scripts.
 *.meta
+!unity/**/*.meta

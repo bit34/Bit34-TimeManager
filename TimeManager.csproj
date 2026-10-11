@@ -3,13 +3,26 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Com_Bit34Games_Time</RootNamespace>
+    <!-- The package has always shipped Bit34-TimeManager.dll, and every
+         consumer's .meta points at that file's GUID. Without this the
+         assembly would be named after the .csproj (TimeManager.dll) and
+         a build would add a second DLL beside the one in use. -->
+    <AssemblyName>Bit34-TimeManager</AssemblyName>
     <PackageId>Com.Bit34Games.Time</PackageId>
-    <Version>3.0.0</Version>
+    <Version>3.1.2</Version>
     <Authors>Oguz Sandikci</Authors>
     <Company>Bit34 Games</Company>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- unity/ is not part of this assembly: it holds engine-specific source
+         that build.py mirrors into the UPM package as plain scripts. The
+         files also carry #if UNITY_2018_1_OR_NEWER guards, so this is the
+         structural half of the same statement. -->
+    <Compile Remove="unity/**/*.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\"/>
